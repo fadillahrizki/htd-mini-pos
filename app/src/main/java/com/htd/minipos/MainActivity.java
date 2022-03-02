@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private final static int FILECHOOSER_RESULTCODE = 1;
     private Uri mCapturedImageURI = null;
 
-    private String WEB_URL = "https://kasir.z-techno.com";
+    private String WEB_URL = "https://crm.htd-official.com/index.php?r=app/gateway&gw_type=minipos";
 
     SwipeRefreshLayout mySwipeRefreshLayout;
 
@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "Sedang Mencetak..", Toast.LENGTH_SHORT).show();
                     Log.d("PRINTING",printText);
                     EscPosPrinter printer = new EscPosPrinter(connection, 203, 48f, 32);
-                    printer.printFormattedText(printText);
+                    printer.printFormattedTextAndOpenCashBox(printText,100);
                 } else {
                     if (!mBluetoothAdapter.isEnabled()) {
                         Intent enableBtIntent = new Intent(
@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
                     }else{
                         Toast.makeText(getApplicationContext(), "Silahkan sambungkan printer terlebih dahulu!", Toast.LENGTH_LONG).show();
                     }
-
+    
                 }
             }
         }catch(Exception e){
