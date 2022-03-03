@@ -8,11 +8,14 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -26,6 +29,8 @@ import android.webkit.ConsoleMessage;
 import android.webkit.PermissionRequest;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
@@ -51,6 +56,9 @@ public class MainActivity extends AppCompatActivity {
 
     SwipeRefreshLayout mySwipeRefreshLayout;
 
+    boolean loadingFinished = true;
+    boolean redirect = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
@@ -72,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             init();
         }
+
     }
 
     public void handlePrint(String printText){
@@ -136,6 +145,42 @@ public class MainActivity extends AppCompatActivity {
         myWebView.getSettings().setDomStorageEnabled(true);
 
         myWebView.setWebViewClient(new WebViewClient(){
+
+            @Override
+            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                super.onReceivedError(view, errorCode, description, failingUrl);
+
+                try {
+                    view.stopLoading();
+                } catch (Exception e) {
+                }
+
+                if (view.canGoBack()) {
+                    view.goBack();
+                }
+
+                view.loadUrl("about:blank");
+                AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+                if(description.contains("ERR_INTERNET_DISCONNECTED")){
+                    alertDialog.setTitle("Tidak ada koneksi internet");
+                    alertDialog.setMessage("Cek koneksi internet anda dan coba lagi!");
+
+                    alertDialog.setButton(DialogInterface.BUTTON_POSITIVE,"Coba Lagi" , new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            finish();
+                            startActivity(getIntent());
+                        }
+                    });
+                }else{
+                    alertDialog.setTitle("Gagal memuat aplikasi");
+                    alertDialog.setMessage("Silahkan hubungi pihak yang bersangkutan!");
+                }
+                alertDialog.setCancelable(false);
+
+
+                alertDialog.show();
+            }
+
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
